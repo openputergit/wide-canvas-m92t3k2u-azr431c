@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        body {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Asset Management System</h1>
+                <button onclick="openModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="bi bi-plus-lg mr-2"></i> Add New Asset
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Laptop Model</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Purchase</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Allotment Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Allotee Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetTableBody" class="divide-y divide-gray-200">
+                        <!-- Table data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="assetModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-2xl font-bold">Add New Asset</p>
+                    <button onclick="closeModal()" class="modal-close cursor-pointer z-50">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <form id="assetForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">System Code</label>
+                        <input type="text" name="systemCode" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Laptop Model</label>
+                        <input type="text" name="laptopModel" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Date of Purchase</label>
+                        <input type="date" name="purchaseDate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Allotment Date</label>
+                        <input type="date" name="allotmentDate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Allotee Name</label>
+                        <input type="text" name="alloteeName" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Save Asset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assets = [];
+
+        // Modal functions
+        function openModal() {
+            const modal = document.getElementById('assetModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('assetModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('assetForm').reset();
+        }
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const asset = {
+                id: Date.now(), // Generate unique ID
+                systemCode: formData.get('systemCode'),
+                laptopModel: formData.get('laptopModel'),
+                purchaseDate: formData.get('purchaseDate'),
+                allotmentDate: formData.get('allotmentDate'),
+                alloteeName: formData.get('alloteeName')
+            };
+            assets.push(asset);
+            updateTable();
+            closeModal();
+        }
+
+        // Delete asset
+        function deleteAsset(id) {
+            assets = assets.filter(asset => asset.id !== id);
+            updateTable();
+        }
+
+        // Update table
+        function updateTable() {
+            const tbody = document.getElementById('assetTableBody');
+            tbody.innerHTML = assets.map(asset => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">${asset.systemCode}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${asset.laptopModel}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${asset.purchaseDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${asset.allotmentDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${asset.alloteeName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="deleteAsset(${asset.id})" class="text-red-600 hover:text-red-900">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize table
+        updateTable();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
